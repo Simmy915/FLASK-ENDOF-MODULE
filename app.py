@@ -15,6 +15,7 @@ class User(object):
         self.username = username
         self.password = password
 
+
 # THIS THE CREATION OF THE PRODUCT PAGE
 class Product(object):
     def __init__(self, product_id, product, category, description, dimensions, price):
@@ -47,8 +48,7 @@ class Database():
         self.cursor = self.conn.cursor()
 
     def registration(self, value):
-        query = ("INSERT INTO user(name, surname, email, username, password) VALUES (?, ?, ?, ?, ?)".format(value))
-        self.cursor.execute(query)
+        self.cursor.execute("INSERT INTO user(name, surname, email, username, password) VALUES (?, ?, ?, ?, ?)", value)
         self.conn.commit()
 
     def edit_profile(self, incoming_data, id):
@@ -212,6 +212,15 @@ def fetch_products():
             new_product.append(Product(data[0], data[1], data[2], data[3], data[4], data[5]))
     return new_product
 
+# Creating a product table
+def init_product_table():
+    with sqlite3.connect('pos.db') as conn:
+        conn.execute("CREATE TABLE IF NOT EXISTS product (product_id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                     "product TEXT NOT NULL, category TEXT NOT NULL, description TEXT NOT NULL, "
+                     "dimensions TEXT NOT NULL, price TEXT NOT NULL)")
+        print("successfully created product table.")
+
+init_product_table()
 user = fetch_products()
 products = fetch_products()
 
@@ -226,15 +235,6 @@ def init_user_table():
                  "password TEXT NOT NULL)")
     print("User table has been succefully created")
     conn.close()
-
-
-# Creating a product table
-def init_product_table():
-    with sqlite3.connect('pos.db') as conn:
-        conn.execute("CREATE TABLE IF NOT EXISTS product (product_id INTEGER PRIMARY KEY AUTOINCREMENT,"
-                     "product TEXT NOT NULL, category TEXT NOT NULL, description TEXT NOT NULL, "
-                     "dimensions TEXT NOT NULL, price TEXT NOT NULL)")
-        print("successfully created product table.")
 
 
 def init_cart_table():
@@ -308,7 +308,7 @@ def registration():
             return response
 
         values = (name, surname, email, username, password)
-        db.registration(values)
+        db.registration(Database(), values)
         response["message"] = "New user successfully registered"
         response["status_code"] = 200
 
@@ -361,7 +361,7 @@ def login():
 
 
 # THIS IS THE DISPLAY ALL USER ROUTE AND FUNCTION
-@app.route('/display-users/', methods=["GET"])
+@app.route('/git ', methods=["GET"])
 def display_users():
     response = {}
     with sqlite3.connect("pos.db") as conn:
@@ -510,4 +510,5 @@ def view_user_products(id):
 
 
 if __name__ == '__main__':
+    app.debug = True
     app.run()
